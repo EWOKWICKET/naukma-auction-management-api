@@ -10,12 +10,11 @@ export const emailTransport = nodemailer.createTransport({
 });
 
 export async function sendVerificationEmail(to: string, token: string): Promise<void> {
-  const url = `${process.env.APP_URL}/api/auth/verify-email?token=${token}`;
   await emailTransport.sendMail({
     from: process.env.FROM_EMAIL,
     to,
     subject: 'Verify your email',
-    html: `<p>Click <a href="${url}">here</a> to verify your email. Link expires in 10 minutes.</p>`,
+    html: token,
   });
 }
 

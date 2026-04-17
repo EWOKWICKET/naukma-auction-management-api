@@ -11,7 +11,7 @@ import {
 const router = Router();
 
 router.post('/register', validate(registerSchema), authController.register);
-router.get('/verify-email', authController.verifyEmail);
+router.post('/verify-email', authController.verifyEmail);
 router.post('/login', validate(loginSchema), authController.login);
 router.post('/request-password-reset', validate(requestPasswordResetSchema), authController.requestPasswordReset);
 router.post('/reset-password', validate(resetPasswordSchema), authController.resetPassword);
