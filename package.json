@@ -4,13 +4,19 @@
   "description": "NaUKMA course final test project",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start:dev": "nodemon src/server.ts",
+    "lint": "eslint src/**/*.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^5.2.1"
+    "eslint": "^10.2.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.5",
+    "express": "^5.2.1",
+    "prettier": "^3.8.3",
+    "typescript-eslint": "^8.58.2"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
