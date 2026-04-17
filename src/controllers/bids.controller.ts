@@ -1,8 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
 import { bidsService } from '../services/bids.service';
 
+type BidRequest = Request<{ lotId: string }>;
+
 export const bidsController = {
-  async place(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async place(req: BidRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const bid = await bidsService.placeBid(req.params.lotId, req.user.id, req.body.amount);
       res.status(201).json(bid);
@@ -11,7 +13,7 @@ export const bidsController = {
     }
   },
 
-  async listForLot(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async listForLot(req: BidRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const bids = await bidsService.getBidsForLot(req.params.lotId);
       res.json(bids);

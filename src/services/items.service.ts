@@ -1,4 +1,4 @@
-import { ItemStatus } from '@prisma/client';
+import { ItemStatus, Role } from '@prisma/client';
 import { itemRepository } from '../repositories/item.repository';
 import { uploadImage } from '../clients/cloudinary.client';
 import { NotFoundError } from '../errors/NotFoundError';
@@ -12,7 +12,7 @@ export const itemsService = {
   },
 
   async list(userId: string, role: string) {
-    if (role === 'ADMIN') return itemRepository.findAll();
+    if (role === Role.ADMIN) return itemRepository.findAll();
 
     return itemRepository.findByOwner(userId);
   },
@@ -28,7 +28,7 @@ export const itemsService = {
     const item = await itemRepository.findById(id);
     if (!item) throw new NotFoundError('Item');
     if (item.ownerId !== userId) throw new ForbiddenError();
-    if (item.status !== 'PENDING') throw new ConflictError('Only PENDING items can be edited');
+    if (item.status !== ItemStatus.PENDING) throw new ConflictError('Only PENDING items can be edited');
 
     return itemRepository.update(id, data);
   },
@@ -37,7 +37,7 @@ export const itemsService = {
     const item = await itemRepository.findById(id);
     if (!item) throw new NotFoundError('Item');
     if (item.ownerId !== userId) throw new ForbiddenError();
-    if (item.status !== 'PENDING') throw new ConflictError('Only PENDING items can be deleted');
+    if (item.status !== ItemStatus.PENDING) throw new ConflictError('Only PENDING items can be deleted');
 
     await itemRepository.delete(id);
   },
@@ -55,7 +55,7 @@ export const itemsService = {
   async approve(id: string) {
     const item = await itemRepository.findById(id);
     if (!item) throw new NotFoundError('Item');
-    if (item.status !== 'PENDING') throw new BadRequestError('Item is not in PENDING status');
+    if (item.status !== ItemStatus.PENDING) throw new BadRequestError('Item is not in PENDING status');
 
     return itemRepository.updateStatus(id, ItemStatus.APPROVED);
   },
@@ -63,7 +63,7 @@ export const itemsService = {
   async reject(id: string) {
     const item = await itemRepository.findById(id);
     if (!item) throw new NotFoundError('Item');
-    if (item.status !== 'PENDING') throw new BadRequestError('Item is not in PENDING status');
+    if (item.status !== ItemStatus.PENDING) throw new BadRequestError('Item is not in PENDING status');
 
     return itemRepository.updateStatus(id, ItemStatus.REJECTED);
   },

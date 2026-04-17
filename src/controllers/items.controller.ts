@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import { itemsService } from '../services/items.service';
 
+type ItemRequest = Request<{ id: string }>;
+
 export const itemsController = {
   async create(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
@@ -20,7 +22,7 @@ export const itemsController = {
     }
   },
 
-  async getById(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async getById(req: ItemRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const item = await itemsService.getById(req.params.id);
       res.json(item);
@@ -29,7 +31,7 @@ export const itemsController = {
     }
   },
 
-  async update(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async update(req: ItemRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const item = await itemsService.update(req.params.id, req.user.id, req.body);
       res.json(item);
@@ -38,7 +40,7 @@ export const itemsController = {
     }
   },
 
-  async delete(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async delete(req: ItemRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       await itemsService.delete(req.params.id, req.user.id);
       res.status(204).send();
@@ -47,7 +49,7 @@ export const itemsController = {
     }
   },
 
-  async uploadImage(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async uploadImage(req: ItemRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       if (!req.file) {
         res.status(400).json({ message: 'No file uploaded' });
@@ -61,7 +63,7 @@ export const itemsController = {
     }
   },
 
-  async approve(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async approve(req: ItemRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const item = await itemsService.approve(req.params.id);
       res.json(item);
@@ -70,7 +72,7 @@ export const itemsController = {
     }
   },
 
-  async reject(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async reject(req: ItemRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const item = await itemsService.reject(req.params.id);
       res.json(item);

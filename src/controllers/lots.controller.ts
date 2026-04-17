@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import { lotsService } from '../services/lots.service';
 
+type LotRequest = Request<{ id: string }>;
+
 export const lotsController = {
   async create(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
@@ -21,7 +23,7 @@ export const lotsController = {
     }
   },
 
-  async getById(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async getById(req: LotRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const lot = await lotsService.getById(req.params.id);
       res.json(lot);

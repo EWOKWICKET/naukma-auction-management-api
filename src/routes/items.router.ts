@@ -1,3 +1,4 @@
+import { Role } from '@prisma/client';
 import { Router } from 'express';
 import { itemsController } from '../controllers/items.controller';
 import { authenticate } from '../middlewares/authenticate.middleware';
@@ -16,7 +17,7 @@ router.get('/:id', itemsController.getById);
 router.patch('/:id', validate(updateItemSchema), itemsController.update);
 router.delete('/:id', itemsController.delete);
 router.post('/:id/image', upload.single('image'), itemsController.uploadImage);
-router.post('/:id/approve', requireRole('ADMIN'), itemsController.approve);
-router.post('/:id/reject', requireRole('ADMIN'), itemsController.reject);
+router.post('/:id/approve', requireRole(Role.ADMIN), itemsController.approve);
+router.post('/:id/reject', requireRole(Role.ADMIN), itemsController.reject);
 
 export default router;

@@ -1,4 +1,5 @@
 import cron from 'node-cron';
+import { ItemStatus, LotStatus, TransactionType } from '@prisma/client';
 import { prisma } from '../db/prisma';
 import { lotRepository } from '../repositories/lot.repository';
 
@@ -9,7 +10,7 @@ export async function runSettleLots(): Promise<void> {
     const topBid = lot.bids[0];
 
     if (!topBid) {
-      await lotRepository.update(lot.id, { status: 'CANCELLED' });
+      await lotRepository.update(lot.id, { status: LotStatus.CANCELLED });
       console.log(`[settle] Lot ${lot.id} cancelled (no bids)`);
       continue;
     }
@@ -28,7 +29,7 @@ export async function runSettleLots(): Promise<void> {
       await tx.transaction.create({
         data: {
           userId: lot.sellerId,
-          type: 'TRANSFER',
+          type: TransactionType.TRANSFER,
           amount: topBid.amount,
           referenceId: lot.id,
         },
@@ -36,12 +37,12 @@ export async function runSettleLots(): Promise<void> {
 
       await tx.item.update({
         where: { id: lot.itemId },
-        data: { status: 'SOLD', ownerId: topBid.bidderId },
+        data: { status: ItemStatus.SOLD, ownerId: topBid.bidderId },
       });
 
       await tx.lot.update({
         where: { id: lot.id },
-        data: { status: 'COMPLETED' },
+        data: { status: LotStatus.COMPLETED },
       });
     });
 

@@ -1,3 +1,4 @@
+import { Role } from '@prisma/client';
 import { Router } from 'express';
 import { usersController } from '../controllers/users.controller';
 import { authenticate } from '../middlewares/authenticate.middleware';
@@ -14,7 +15,7 @@ router.get('/me', usersController.getMe);
 router.post('/me/avatar', upload.single('avatar'), usersController.uploadAvatar);
 router.delete('/me/avatar', usersController.deleteAvatar);
 router.post('/me/deposit', validate(depositSchema), usersController.deposit);
-router.get('/', requireRole('ADMIN'), usersController.listAll);
-router.get('/:id', requireRole('ADMIN'), usersController.getById);
+router.get('/', requireRole(Role.ADMIN), usersController.listAll);
+router.get('/:id', requireRole(Role.ADMIN), usersController.getById);
 
 export default router;

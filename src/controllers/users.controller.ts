@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import { usersService } from '../services/users.service';
 
+type UserRequest = Request<{ id: string }>;
+
 export const usersController = {
   async getMe(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
@@ -52,7 +54,7 @@ export const usersController = {
     }
   },
 
-  async getById(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async getById(req: UserRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const user = await usersService.getById(req.params.id);
       res.json(user);

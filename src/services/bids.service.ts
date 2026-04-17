@@ -1,4 +1,4 @@
-import { Bid } from '@prisma/client';
+import { Bid, LotStatus, TransactionType } from '@prisma/client';
 import { prisma } from '../db/prisma';
 import { lotRepository } from '../repositories/lot.repository';
 import { bidRepository } from '../repositories/bid.repository';
@@ -11,7 +11,7 @@ export const bidsService = {
   async placeBid(lotId: string, bidderId: string, amount: number) {
     const lot = await lotRepository.findById(lotId);
     if (!lot) throw new NotFoundError('Lot');
-    if (lot.status !== 'ACTIVE') throw new BadRequestError('Lot is not active');
+    if (lot.status !== LotStatus.ACTIVE) throw new BadRequestError('Lot is not active');
     if (new Date() >= lot.endTime) throw new BadRequestError('Lot has ended');
     if (amount <= Number(lot.currentPrice)) {
       throw new BadRequestError(`Bid must exceed current price of ${lot.currentPrice}`);
@@ -47,7 +47,7 @@ export const bidsService = {
         await tx.transaction.create({
           data: {
             userId: prevTopBid.bidderId,
-            type: 'RELEASE',
+            type: TransactionType.RELEASE,
             amount: prevTopBid.amount,
             referenceId: lotId,
           },
@@ -55,7 +55,7 @@ export const bidsService = {
       }
 
       await tx.transaction.create({
-        data: { userId: bidderId, type: 'HOLD', amount, referenceId: lotId },
+        data: { userId: bidderId, type: TransactionType.HOLD, amount, referenceId: lotId },
       });
 
       await tx.lot.update({

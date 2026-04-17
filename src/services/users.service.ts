@@ -1,3 +1,4 @@
+import { TransactionType } from '@prisma/client';
 import { prisma } from '../db/prisma';
 import { userRepository } from '../repositories/user.repository';
 import { uploadImage, deleteImage } from '../clients/cloudinary.client';
@@ -15,7 +16,7 @@ export const usersService = {
   async deposit(userId: string, amount: number) {
     const [user] = await prisma.$transaction([
       prisma.user.update({ where: { id: userId }, data: { balance: { increment: amount } } }),
-      prisma.transaction.create({ data: { userId, type: 'DEPOSIT', amount } }),
+      prisma.transaction.create({ data: { userId, type: TransactionType.DEPOSIT, amount } }),
     ]);
     const { passwordHash, ...safe } = user;
 

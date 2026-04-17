@@ -1,3 +1,4 @@
+import { ItemStatus } from '@prisma/client';
 import { itemRepository } from '../repositories/item.repository';
 import { lotRepository } from '../repositories/lot.repository';
 import { NotFoundError } from '../errors/NotFoundError';
@@ -15,7 +16,7 @@ export const lotsService = {
     const item = await itemRepository.findById(itemId);
     if (!item) throw new NotFoundError('Item');
     if (item.ownerId !== userId) throw new ForbiddenError();
-    if (item.status !== 'APPROVED') throw new ConflictError('Item must be APPROVED to create a lot');
+    if (item.status !== ItemStatus.APPROVED) throw new ConflictError('Item must be APPROVED to create a lot');
 
     return lotRepository.create({
       item: { connect: { id: itemId } },
