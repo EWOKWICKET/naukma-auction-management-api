@@ -1,0 +1,106 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum ItemStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  SOLD
+}
+
+enum LotStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum TransactionType {
+  DEPOSIT
+  HOLD
+  RELEASE
+  TRANSFER
+}
+
+model User {
+  id                  String    @id @default(uuid())
+  email               String    @unique
+  passwordHash        String
+  role                Role      @default(USER)
+  isVerified          Boolean   @default(false)
+  balance             Decimal   @default(0) @db.Decimal(12, 2)
+  frozenBalance       Decimal   @default(0) @db.Decimal(12, 2)
+  avatarUrl           String?
+  avatarPublicId      String?
+  passwordResetToken  String?
+  passwordResetExpiry DateTime?
+  createdAt           DateTime  @default(now())
+
+  items        Item[]
+  lots         Lot[]         @relation("SellerLots")
+  bids         Bid[]
+  transactions Transaction[]
+}
+
+model Item {
+  id            String     @id @default(uuid())
+  ownerId       String
+  title         String
+  description   String
+  imageUrl      String?
+  imagePublicId String?
+  status        ItemStatus @default(PENDING)
+  createdAt     DateTime   @default(now())
+
+  owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  lot   Lot?
+}
+
+model Lot {
+  id           String    @id @default(uuid())
+  itemId       String    @unique
+  sellerId     String
+  startPrice   Decimal   @db.Decimal(12, 2)
+  currentPrice Decimal   @db.Decimal(12, 2)
+  startTime    DateTime
+  endTime      DateTime
+  status       LotStatus @default(ACTIVE)
+  createdAt    DateTime  @default(now())
+
+  item         Item          @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  seller       User          @relation("SellerLots", fields: [sellerId], references: [id])
+  bids         Bid[]
+  transactions Transaction[]
+}
+
+model Bid {
+  id        String   @id @default(uuid())
+  lotId     String
+  bidderId  String
+  amount    Decimal  @db.Decimal(12, 2)
+  createdAt DateTime @default(now())
+
+  lot    Lot  @relation(fields: [lotId], references: [id], onDelete: Cascade)
+  bidder User @relation(fields: [bidderId], references: [id])
+}
+
+model Transaction {
+  id          String          @id @default(uuid())
+  userId      String
+  type        TransactionType
+  amount      Decimal         @db.Decimal(12, 2)
+  referenceId String?
+  createdAt   DateTime        @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+  lot  Lot? @relation(fields: [referenceId], references: [id])
+}
