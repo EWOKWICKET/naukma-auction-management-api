@@ -7,7 +7,7 @@ export const usersService = {
   async getProfile(userId: string) {
     const user = await userRepository.findById(userId);
     if (!user) throw new NotFoundError('User');
-    const { passwordHash, passwordResetToken, passwordResetExpiry, ...safe } = user;
+    const { passwordHash, ...safe } = user;
 
     return safe;
   },
@@ -17,7 +17,7 @@ export const usersService = {
       prisma.user.update({ where: { id: userId }, data: { balance: { increment: amount } } }),
       prisma.transaction.create({ data: { userId, type: 'DEPOSIT', amount } }),
     ]);
-    const { passwordHash, passwordResetToken, passwordResetExpiry, ...safe } = user;
+    const { passwordHash, ...safe } = user;
 
     return safe;
   },
@@ -26,13 +26,9 @@ export const usersService = {
     const user = await userRepository.findById(userId);
     if (!user) throw new NotFoundError('User');
 
-    if (user.avatarPublicId) {
-      await deleteImage(user.avatarPublicId);
-    }
-
-    const { url, publicId } = await uploadImage(buffer, 'auction-avatars');
-    const updated = await userRepository.update(userId, { avatarUrl: url, avatarPublicId: publicId });
-    const { passwordHash, passwordResetToken, passwordResetExpiry, ...safe } = updated;
+    const url = await uploadImage(buffer, 'auction-avatars', userId);
+    const updated = await userRepository.update(userId, { avatarUrl: url });
+    const { passwordHash, ...safe } = updated;
 
     return safe;
   },
@@ -41,12 +37,12 @@ export const usersService = {
     const user = await userRepository.findById(userId);
     if (!user) throw new NotFoundError('User');
 
-    if (user.avatarPublicId) {
-      await deleteImage(user.avatarPublicId);
+    if (user.avatarUrl) {
+      await deleteImage('auction-avatars', userId);
     }
 
-    const updated = await userRepository.update(userId, { avatarUrl: null, avatarPublicId: null });
-    const { passwordHash, passwordResetToken, passwordResetExpiry, ...safe } = updated;
+    const updated = await userRepository.update(userId, { avatarUrl: null });
+    const { passwordHash, ...safe } = updated;
 
     return safe;
   },
@@ -58,7 +54,7 @@ export const usersService = {
   async getById(id: string) {
     const user = await userRepository.findById(id);
     if (!user) throw new NotFoundError('User');
-    const { passwordHash, passwordResetToken, passwordResetExpiry, ...safe } = user;
+    const { passwordHash, ...safe } = user;
 
     return safe;
   },

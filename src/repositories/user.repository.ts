@@ -8,14 +8,6 @@ export const userRepository = {
   findById: (id: string) =>
     prisma.user.findUnique({ where: { id } }),
 
-  findByResetToken: (tokenHash: string) =>
-    prisma.user.findFirst({
-      where: {
-        passwordResetToken: tokenHash,
-        passwordResetExpiry: { gt: new Date() },
-      },
-    }),
-
   create: (data: Prisma.UserCreateInput) =>
     prisma.user.create({ data }),
 

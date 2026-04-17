@@ -47,9 +47,9 @@ export const itemsService = {
     if (!item) throw new NotFoundError('Item');
     if (item.ownerId !== userId) throw new ForbiddenError();
 
-    const { url, publicId } = await uploadImage(buffer, 'auction-items');
+    const url = await uploadImage(buffer, 'auction-items', id);
 
-    return itemRepository.update(id, { imageUrl: url, imagePublicId: publicId });
+    return itemRepository.update(id, { imageUrl: url });
   },
 
   async approve(id: string) {

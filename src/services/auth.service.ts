@@ -1,6 +1,5 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import crypto from 'crypto';
 import { userRepository } from '../repositories/user.repository';
 import { sendVerificationEmail, sendPasswordResetEmail } from '../clients/email.client';
 import { ConflictError } from '../errors/ConflictError';
@@ -17,6 +16,10 @@ function signVerificationToken(userId: string): string {
   return jwt.sign({ id: userId, purpose: 'verify' }, process.env.JWT_SECRET!, {
     expiresIn: '10m',
   });
+}
+
+function signPasswordResetToken(userId: string): string {
+  return jwt.sign({ id: userId, purpose: 'reset' }, process.env.JWT_SECRET!, { expiresIn: '1h' });
 }
 
 export const authService = {
@@ -63,28 +66,24 @@ export const authService = {
     const user = await userRepository.findByEmail(email);
     if (!user) return;
 
-    const token = crypto.randomBytes(32).toString('hex');
-    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
-    const expiry = new Date(Date.now() + 60 * 60 * 1000);
-
-    await userRepository.update(user.id, {
-      passwordResetToken: tokenHash,
-      passwordResetExpiry: expiry,
-    });
-
+    const token = signPasswordResetToken(user.id);
     await sendPasswordResetEmail(email, token);
   },
 
   async resetPassword(token: string, newPassword: string): Promise<void> {
-    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
-    const user = await userRepository.findByResetToken(tokenHash);
-    if (!user) throw new BadRequestError('Invalid or expired reset token');
+    let payload: { id: string; purpose: string };
+    try {
+      payload = jwt.verify(token, process.env.JWT_SECRET!) as typeof payload;
+    } catch {
+      throw new BadRequestError('Invalid or expired reset token');
+    }
+
+    if (payload.purpose !== 'reset') throw new BadRequestError('Invalid token');
+
+    const user = await userRepository.findById(payload.id);
+    if (!user) throw new BadRequestError('User not found');
 
     const passwordHash = await bcrypt.hash(newPassword, SALT_ROUNDS);
-    await userRepository.update(user.id, {
-      passwordHash,
-      passwordResetToken: null,
-      passwordResetExpiry: null,
-    });
+    await userRepository.update(user.id, { passwordHash });
   },
 };

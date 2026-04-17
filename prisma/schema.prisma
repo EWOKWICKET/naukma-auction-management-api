@@ -40,9 +40,6 @@ model User {
   balance             Decimal   @default(0) @db.Decimal(12, 2)
   frozenBalance       Decimal   @default(0) @db.Decimal(12, 2)
   avatarUrl           String?
-  avatarPublicId      String?
-  passwordResetToken  String?
-  passwordResetExpiry DateTime?
   createdAt           DateTime  @default(now())
 
   items        Item[]
@@ -57,7 +54,6 @@ model Item {
   title         String
   description   String
   imageUrl      String?
-  imagePublicId String?
   status        ItemStatus @default(PENDING)
   createdAt     DateTime   @default(now())
 
