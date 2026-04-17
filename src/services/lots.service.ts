@@ -1,9 +1,14 @@
-import { ItemStatus } from '@prisma/client';
-import { itemRepository } from '../repositories/item.repository';
+import { ItemStatus, LotStatus, Prisma } from '@prisma/client';
+import { prisma } from '../db/prisma';
 import { lotRepository } from '../repositories/lot.repository';
-import { NotFoundError } from '../errors/NotFoundError';
+import { itemsService } from './items.service';
 import { ForbiddenError } from '../errors/ForbiddenError';
 import { ConflictError } from '../errors/ConflictError';
+
+type Tx = Omit<
+  typeof prisma,
+  '$connect' | '$disconnect' | '$on' | '$transaction' | '$use' | '$extends'
+>;
 
 export const lotsService = {
   async create(
@@ -13,10 +18,10 @@ export const lotsService = {
     startTime: string,
     endTime: string,
   ) {
-    const item = await itemRepository.findById(itemId);
-    if (!item) throw new NotFoundError('Item');
+    const item = await itemsService.getById(itemId);
     if (item.ownerId !== userId) throw new ForbiddenError();
-    if (item.status !== ItemStatus.APPROVED) throw new ConflictError('Item must be APPROVED to create a lot');
+    if (item.status !== ItemStatus.APPROVED)
+      throw new ConflictError('Item must be APPROVED to create a lot');
 
     return lotRepository.create({
       item: { connect: { id: itemId } },
@@ -33,9 +38,22 @@ export const lotsService = {
   },
 
   async getById(id: string) {
-    const lot = await lotRepository.findById(id);
-    if (!lot) throw new NotFoundError('Lot');
+    return lotRepository.findByIdOrFail(id);
+  },
 
-    return lot;
+  async findExpired() {
+    return lotRepository.findExpired();
+  },
+
+  async update(id: string, data: Prisma.LotUpdateInput, tx?: Tx) {
+    return lotRepository.update(id, data, tx);
+  },
+
+  async complete(id: string, tx?: Tx) {
+    return lotRepository.update(id, { status: LotStatus.COMPLETED }, tx);
+  },
+
+  async cancel(id: string, tx?: Tx) {
+    return lotRepository.update(id, { status: LotStatus.CANCELLED }, tx);
   },
 };

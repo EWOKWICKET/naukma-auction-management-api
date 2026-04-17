@@ -1,5 +1,11 @@
 import { Prisma, LotStatus } from '@prisma/client';
 import { prisma } from '../db/prisma';
+import { NotFoundError } from '../errors/NotFoundError';
+
+type Tx = Omit<
+  typeof prisma,
+  '$connect' | '$disconnect' | '$on' | '$transaction' | '$use' | '$extends'
+>;
 
 export const lotRepository = {
   create: (data: Prisma.LotCreateInput) =>
@@ -18,6 +24,13 @@ export const lotRepository = {
       },
     }),
 
+  async findByIdOrFail(id: string) {
+    const lot = await lotRepository.findById(id);
+    if (!lot) throw new NotFoundError('Lot');
+
+    return lot;
+  },
+
   findActive: () =>
     prisma.lot.findMany({
       where: { status: LotStatus.ACTIVE },
@@ -31,6 +44,6 @@ export const lotRepository = {
       include: { bids: { orderBy: { amount: 'desc' }, take: 1 } },
     }),
 
-  update: (id: string, data: Prisma.LotUpdateInput) =>
-    prisma.lot.update({ where: { id }, data }),
+  update: (id: string, data: Prisma.LotUpdateInput, tx?: Tx) =>
+    (tx ?? prisma).lot.update({ where: { id }, data }),
 };

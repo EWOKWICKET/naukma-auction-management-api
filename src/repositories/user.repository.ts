@@ -1,18 +1,22 @@
 import { Prisma } from '@prisma/client';
 import { prisma } from '../db/prisma';
+import { NotFoundError } from '../errors/NotFoundError';
 
 export const userRepository = {
-  findByEmail: (email: string) =>
-    prisma.user.findUnique({ where: { email } }),
+  findByEmail: (email: string) => prisma.user.findUnique({ where: { email } }),
 
-  findById: (id: string) =>
-    prisma.user.findUnique({ where: { id } }),
+  findById: (id: string) => prisma.user.findUnique({ where: { id } }),
 
-  create: (data: Prisma.UserCreateInput) =>
-    prisma.user.create({ data }),
+  async findByIdOrFail(id: string) {
+    const user = await userRepository.findById(id);
+    if (!user) throw new NotFoundError('User');
 
-  update: (id: string, data: Prisma.UserUpdateInput) =>
-    prisma.user.update({ where: { id }, data }),
+    return user;
+  },
+
+  create: (data: Prisma.UserCreateInput) => prisma.user.create({ data }),
+
+  update: (id: string, data: Prisma.UserUpdateInput) => prisma.user.update({ where: { id }, data }),
 
   findAll: () =>
     prisma.user.findMany({
