@@ -1,0 +1,741 @@
+{
+    "info": {
+        "_postman_id": "naukma-auction-management-api",
+        "name": "NaUKMA Auction Management API",
+        "description": "Complete collection for the NaUKMA Auction Management API.\n\n**Setup:**\n1. Set the `baseUrl` collection variable (default: http://localhost:3000/api)\n2. Run Register → Verify Email → Login. Login auto-saves `{{token}}`.\n3. After creating an item, `{{itemId}}` is auto-saved. After creating a lot, `{{lotId}}` is auto-saved.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "auth": {
+        "type": "bearer",
+        "bearer": [
+            {
+                "key": "token",
+                "value": "{{token}}",
+                "type": "string"
+            }
+        ]
+    },
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "http://localhost:3000/api",
+            "type": "string"
+        },
+        {
+            "key": "token",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "itemId",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "lotId",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "userId",
+            "value": "",
+            "type": "string"
+        }
+    ],
+    "item": [
+        {
+            "name": "Auth",
+            "item": [
+                {
+                    "name": "Register",
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "// --- USER (active) ---\n{\n    \"email\": \"user@example.com\",\n    \"password\": \"User1234!\"\n}\n\n// --- ADMIN (comment out block above, uncomment block below) ---\n// {\n//     \"email\": \"admin@example.com\",\n//     \"password\": \"Admin1234@\"\n// }",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/register",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "register"
+                            ]
+                        },
+                        "description": "Register a new account. A verification email is sent automatically.\n\nPassword rules: 8+ chars, 1 uppercase, 1 digit, 1 special character."
+                    }
+                },
+                {
+                    "name": "Verify Email",
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/verify-email?token=PASTE_TOKEN_FROM_EMAIL_HERE",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "verify-email"
+                            ],
+                            "query": [
+                                {
+                                    "key": "token",
+                                    "value": "PASTE_TOKEN_FROM_EMAIL_HERE",
+                                    "description": "JWT token received in the verification email. Expires in 10 minutes."
+                                }
+                            ]
+                        },
+                        "description": "Verify the email address using the token from the registration email. Replace the token query param value before sending."
+                    }
+                },
+                {
+                    "name": "Login",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "var json = pm.response.json();",
+                                    "if (json.token) {",
+                                    "    pm.collectionVariables.set('token', json.token);",
+                                    "    console.log('Token saved to {{token}}');",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "// --- USER (active) ---\n{\n    \"email\": \"user@example.com\",\n    \"password\": \"User1234!\"\n}\n\n// --- ADMIN (comment out block above, uncomment block below) ---\n// {\n//     \"email\": \"admin@example.com\",\n//     \"password\": \"Admin1234@\"\n// }",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/login",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "login"
+                            ]
+                        },
+                        "description": "Login and receive a JWT token (7-day expiry). The test script auto-saves the token to the `{{token}}` collection variable so all other requests pick it up immediately."
+                    }
+                },
+                {
+                    "name": "Request Password Reset",
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"user@example.com\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/request-password-reset",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "request-password-reset"
+                            ]
+                        },
+                        "description": "Send a password reset link to the given email. The reset token expires in 1 hour."
+                    }
+                },
+                {
+                    "name": "Reset Password",
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"token\": \"PASTE_TOKEN_FROM_EMAIL_HERE\",\n    \"newPassword\": \"NewPass1!\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/reset-password",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "reset-password"
+                            ]
+                        },
+                        "description": "Set a new password using the reset token received by email. Replace `token` with the actual JWT from the email."
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Users",
+            "item": [
+                {
+                    "name": "Get My Profile",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/users/me",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "users",
+                                "me"
+                            ]
+                        },
+                        "description": "Get the authenticated user's profile. Returns id, email, role, isVerified, balance, frozenBalance, avatarUrl, createdAt. Never returns passwordHash."
+                    }
+                },
+                {
+                    "name": "Deposit Funds",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"amount\": 1000\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/users/me/deposit",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "users",
+                                "me",
+                                "deposit"
+                            ]
+                        },
+                        "description": "Add funds to the user's balance. Amount must be a positive number. Creates a DEPOSIT transaction in the audit log."
+                    }
+                },
+                {
+                    "name": "Upload Avatar",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "avatar",
+                                    "type": "file",
+                                    "src": "",
+                                    "description": "Select a JPEG, PNG, or WebP file. Max 5 MB."
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/users/me/avatar",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "users",
+                                "me",
+                                "avatar"
+                            ]
+                        },
+                        "description": "Upload a profile avatar. Accepted formats: JPEG, PNG, WebP. Max 5 MB. Image is stored on Cloudinary."
+                    }
+                },
+                {
+                    "name": "Delete Avatar",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/users/me/avatar",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "users",
+                                "me",
+                                "avatar"
+                            ]
+                        },
+                        "description": "Remove the user's avatar. Deletes the image from Cloudinary and sets avatarUrl to null."
+                    }
+                },
+                {
+                    "name": "List All Users [Admin]",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/users",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "users"
+                            ]
+                        },
+                        "description": "Admin only. Returns all users (no passwordHash)."
+                    }
+                },
+                {
+                    "name": "Get User by ID [Admin]",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/users/{{userId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "users",
+                                "{{userId}}"
+                            ]
+                        },
+                        "description": "Admin only. Get a specific user by ID. Set the `{{userId}}` collection variable before sending."
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Items",
+            "item": [
+                {
+                    "name": "Create Item",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "var json = pm.response.json();",
+                                    "if (json.id) {",
+                                    "    pm.collectionVariables.set('itemId', json.id);",
+                                    "    console.log('itemId saved:', json.id);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"title\": \"Vintage Mechanical Watch\",\n    \"description\": \"A beautiful 1960s Swiss mechanical watch in perfect working condition. Original leather strap and original case.\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/items",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "items"
+                            ]
+                        },
+                        "description": "Create a new item. Starts in PENDING status — must be approved by an admin before you can create a lot for it. The test script auto-saves the item ID to `{{itemId}}`."
+                    }
+                },
+                {
+                    "name": "List Items",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/items",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "items"
+                            ]
+                        },
+                        "description": "List items. Regular users see only their own items. Admins see all items."
+                    }
+                },
+                {
+                    "name": "Get Item",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/items/{{itemId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "items",
+                                "{{itemId}}"
+                            ]
+                        },
+                        "description": "Get details of a specific item. Uses the `{{itemId}}` collection variable."
+                    }
+                },
+                {
+                    "name": "Update Item",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"title\": \"Vintage Mechanical Watch – Revised\",\n    \"description\": \"Updated description with additional provenance details and service history.\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/items/{{itemId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "items",
+                                "{{itemId}}"
+                            ]
+                        },
+                        "description": "Update item title or description. Only works if item is in PENDING status and you are the owner. Both fields are optional."
+                    }
+                },
+                {
+                    "name": "Delete Item",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/items/{{itemId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "items",
+                                "{{itemId}}"
+                            ]
+                        },
+                        "description": "Delete an item. Only works if item is in PENDING status and you are the owner."
+                    }
+                },
+                {
+                    "name": "Upload Item Image",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "image",
+                                    "type": "file",
+                                    "src": "",
+                                    "description": "Select a JPEG, PNG, or WebP file. Max 5 MB."
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/items/{{itemId}}/image",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "items",
+                                "{{itemId}}",
+                                "image"
+                            ]
+                        },
+                        "description": "Upload an image for the item. Accepted formats: JPEG, PNG, WebP. Max 5 MB. Stored on Cloudinary."
+                    }
+                },
+                {
+                    "name": "Approve Item [Admin]",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/items/{{itemId}}/approve",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "items",
+                                "{{itemId}}",
+                                "approve"
+                            ]
+                        },
+                        "description": "Admin only. Transitions item status PENDING → APPROVED. The item is now eligible for auction."
+                    }
+                },
+                {
+                    "name": "Reject Item [Admin]",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/items/{{itemId}}/reject",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "items",
+                                "{{itemId}}",
+                                "reject"
+                            ]
+                        },
+                        "description": "Admin only. Transitions item status PENDING → REJECTED."
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Lots",
+            "item": [
+                {
+                    "name": "List Lots",
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/lots",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "lots"
+                            ]
+                        },
+                        "description": "List all ACTIVE lots, sorted by endTime ascending (ending soonest first). No authentication required."
+                    }
+                },
+                {
+                    "name": "Get Lot",
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/lots/{{lotId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "lots",
+                                "{{lotId}}"
+                            ]
+                        },
+                        "description": "Get lot details including item info, seller info, and top 10 bids sorted by amount descending. No authentication required."
+                    }
+                },
+                {
+                    "name": "Create Lot",
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "exec": [
+                                    "// startTime = 1 minute from now, endTime = 2 hours from now",
+                                    "var startTime = new Date(Date.now() + 60 * 1000).toISOString();",
+                                    "var endTime = new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString();",
+                                    "pm.variables.set('startTime', startTime);",
+                                    "pm.variables.set('endTime', endTime);"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        },
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "var json = pm.response.json();",
+                                    "if (json.id) {",
+                                    "    pm.collectionVariables.set('lotId', json.id);",
+                                    "    console.log('lotId saved:', json.id);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"itemId\": \"{{itemId}}\",\n    \"startPrice\": 100,\n    \"startTime\": \"{{startTime}}\",\n    \"endTime\": \"{{endTime}}\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/lots",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "lots"
+                            ]
+                        },
+                        "description": "Create an auction lot from an APPROVED item. You must be the item's owner.\n\nThe pre-request script auto-sets `startTime` (1 min from now) and `endTime` (2 hours from now). The test script auto-saves the lot ID to `{{lotId}}`."
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Bids",
+            "item": [
+                {
+                    "name": "Place Bid",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"amount\": 150\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/lots/{{lotId}}/bids",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "lots",
+                                "{{lotId}}",
+                                "bids"
+                            ]
+                        },
+                        "description": "Place a bid on an active lot.\n\nRules:\n- `amount` must exceed `currentPrice`\n- Bidder must have enough unfrozen balance\n- Lot must be ACTIVE and not yet expired\n- Sniper rule: bid within 10 min of `endTime` extends it by 10 min\n\nOn success: previous top bidder's funds are unfrozen (RELEASE), your funds are frozen (HOLD)."
+                    }
+                },
+                {
+                    "name": "List Bids",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/lots/{{lotId}}/bids",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "lots",
+                                "{{lotId}}",
+                                "bids"
+                            ]
+                        },
+                        "description": "Get all bids for a lot, sorted by amount descending. Includes bidder info (id, email)."
+                    }
+                }
+            ]
+        }
+    ]
+}
