@@ -30,7 +30,9 @@ export const authService = {
     const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
     const user = await userRepository.create({ email, passwordHash });
     const token = signVerificationToken(user.id);
-    sendVerificationEmail(email, token).catch(console.error);
+    sendVerificationEmail(email, token).catch((err) =>
+      console.error('[email] verification send failed:', err.message),
+    );
   },
 
   async login(email: string, password: string): Promise<string> {
