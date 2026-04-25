@@ -4,6 +4,7 @@
   "description": "NaUKMA course final test project",
   "main": "index.js",
   "scripts": {
+    "start": "node dist/server.js",
     "start:dev": "nodemon src/server.ts",
     "build": "tsc",
     "lint": "eslint src/**/*.ts",

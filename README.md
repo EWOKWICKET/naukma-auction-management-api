@@ -75,7 +75,7 @@ All routes are prefixed with `/api`. Protected routes require `Authorization: Be
 | Method | Path                | Role  | Notes                                                           |
 | ------ | ------------------- | ----- | --------------------------------------------------------------- |
 | GET    | `/users/me`         | Any   | Own profile                                                     |
-| POST   | `/users/me/avatar`  | Any   | `multipart/form-data`, field: `image` (JPEG/PNG/WebP, max 5 MB) |
+| POST   | `/users/me/avatar`  | Any   | `multipart/form-data`, field: `avatar` (JPEG/PNG/WebP, max 5 MB) |
 | DELETE | `/users/me/avatar`  | Any   | Removes from Cloudinary                                         |
 | POST   | `/users/me/deposit` | Any   | `{amount}`                                                      |
 | GET    | `/users/`           | Admin | List all users                                                  |
