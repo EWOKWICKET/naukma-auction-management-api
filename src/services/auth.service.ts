@@ -30,7 +30,7 @@ export const authService = {
     const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
     const user = await userRepository.create({ email, passwordHash });
     const token = signVerificationToken(user.id);
-    await sendVerificationEmail(email, token);
+    sendVerificationEmail(email, token).catch(console.error);
   },
 
   async login(email: string, password: string): Promise<string> {
@@ -67,7 +67,7 @@ export const authService = {
     if (!user) return;
 
     const token = signPasswordResetToken(user.id);
-    await sendPasswordResetEmail(email, token);
+    sendPasswordResetEmail(email, token).catch(console.error);
   },
 
   async resetPassword(token: string, newPassword: string): Promise<void> {
